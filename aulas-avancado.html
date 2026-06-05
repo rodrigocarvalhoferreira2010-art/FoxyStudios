@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoxyAcademy - Avançado</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f0f2f5; color: #333; }
+
+        .sidebar { height: 100vh; width: 240px; position: fixed; top: 0; left: 0; background: linear-gradient(180deg, #2c2c2c 0%, #1a1a1a 100%); box-shadow: 3px 0 15px rgba(0,0,0,0.4); z-index: 100; overflow-y: auto; display: flex; flex-direction: column; }
+        .sidebar-logo { display: flex; align-items: center; gap: 12px; padding: 22px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 8px; flex-shrink: 0; }
+        .sidebar-logo a { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon { width: 34px; height: 34px; border-radius: 8px; object-fit: contain; padding: 4px; flex-shrink: 0; }
+        .logo-text { color: #fff; font-weight: 600; font-size: 14px; }
+        .sidebar nav { flex: 1; padding-bottom: 20px; }
+        .sidebar a { padding: 12px 22px; text-decoration: none; font-size: 14px; color: #aaa; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .sidebar a:hover { background: rgba(255,255,255,0.05); color: #fff; padding-left: 30px; }
+        .sidebar a.ativo { border-left: 3px solid #ff4d4d; color: #ff4d4d; font-weight: 600; background: rgba(255,77,77,0.1); }
+        .menu-toggle { padding: 12px 22px; cursor: pointer; font-size: 14px; color: #aaa; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease; border-left: 3px solid transparent; user-select: none; }
+        .menu-toggle:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .menu-toggle.aberto { color: #ff4d4d; border-left: 3px solid #ff4d4d; background: rgba(255,77,77,0.08); }
+        .toggle-left { display: flex; align-items: center; gap: 10px; }
+        .seta { font-size: 11px; transition: transform 0.3s ease; }
+        .seta.rodada { transform: rotate(180deg); }
+        .submenu { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; background: rgba(0,0,0,0.15); }
+        .submenu.aberto { max-height: 200px; }
+        .submenu a { padding: 9px 22px 9px 48px; font-size: 13px; color: #888; gap: 0; }
+        .submenu a:hover { padding-left: 55px; color: #ddd; background: rgba(255,255,255,0.04); }
+        .submenu a.ativo { color: #ff4d4d; border-left: 3px solid #ff4d4d; background: rgba(255,77,77,0.1); font-weight: 600; }
+
+        .conteudo { margin-left: 240px; padding: 50px; max-width: 950px; }
+        .page-header { margin-bottom: 40px; }
+        .page-header h1 { font-size: 2em; color: #1a1a1a; margin: 0 0 8px; }
+        .page-header .subtitulo { color: #777; font-size: 1.05em; margin: 0 0 14px; }
+        .linha-destaque { width: 50px; height: 4px; background: #ff4d4d; border-radius: 2px; }
+        .nivel-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 16px; background: #fce4ec; color: #b71c1c; }
+        .aula-card { background: #fff; border-radius: 10px; padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-top: 4px solid #ff4d4d; transition: transform 0.25s, box-shadow 0.25s; }
+        .aula-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .aula-card h2 { color: #e84040; font-size: 1.2em; margin: 0 0 14px; }
+        .aula-card h3 { color: #444; font-size: 1em; margin: 20px 0 8px; }
+        .aula-card p { line-height: 1.75; color: #555; font-size: 0.97em; margin: 0 0 12px; }
+        ul, ol { padding-left: 22px; }
+        li { margin-bottom: 8px; color: #555; line-height: 1.7; }
+        strong { color: #333; }
+        hr { border: none; height: 1px; background: #eee; margin: 20px 0; }
+
+        pre { background: #1e1e1e; color: #00ff0d; padding: 18px 22px; border-radius: 8px; overflow-x: auto; line-height: 1.6; font-family: 'Consolas', monospace; font-size: 0.88em; margin: 12px 0; border-left: 4px solid #ff4d4d; }
+        code { background: #2d2d2d; color: #ff9f43; padding: 2px 7px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.88em; }
+        pre code { background: none; color: inherit; padding: 0; }
+
+        .info-box { padding: 14px 18px; border-radius: 0 8px 8px 0; border-left: 4px solid #ff4d4d; background: #fff5f5; margin: 14px 0; font-size: 0.95em; line-height: 1.65; color: #555; }
+        .info-box.dica { background: #f0f9ff; border-color: #3498db; }
+        .info-box.aviso { background: #fff9e6; border-color: #f39c12; }
+        .info-box.sucesso { background: #f0fff4; border-color: #27ae60; }
+
+        .flex-demo { display: flex; gap: 10px; margin: 14px 0; flex-wrap: wrap; }
+        .flex-item { background: #ff4d4d; color: white; padding: 12px 18px; border-radius: 6px; font-weight: 600; font-size: 0.9em; }
+        .flex-demo.center { justify-content: center; }
+        .flex-demo.between { justify-content: space-between; }
+        .flex-demo.column { flex-direction: column; max-width: 200px; }
+        .demo-label { font-size: 12px; color: #999; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .grid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; }
+        .grid-item { background: #3498db; color: white; padding: 14px; border-radius: 6px; font-weight: 600; font-size: 0.9em; text-align: center; }
+        .grid-item.wide { grid-column: span 2; background: #2980b9; }
+        .grid-item.full { grid-column: 1 / -1; background: #1a5276; }
+
+        .variaveis-demo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+        .var-card { border-radius: 8px; padding: 16px; }
+
+        .js-demo { background: #1e1e1e; border-radius: 8px; padding: 20px; margin: 14px 0; font-family: 'Consolas', monospace; font-size: 0.88em; line-height: 1.8; border-left: 4px solid #f0db4f; }
+        .js-demo .comentario { color: #6a9955; }
+        .js-demo .keyword { color: #569cd6; }
+        .js-demo .string { color: #ce9178; }
+        .js-demo .funcao { color: #dcdcaa; }
+        .js-demo .numero { color: #b5cea8; }
+
+        .botao-demo { display: inline-block; background: #ff4d4d; color: white; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.95em; margin-top: 10px; transition: background 0.2s; border: none; }
+        .botao-demo:hover { background: #e03030; }
+        #resultado-demo { margin-top: 12px; padding: 12px 16px; background: #f0f9ff; border-radius: 6px; border-left: 3px solid #3498db; font-size: 0.92em; color: #555; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <a href="entrada.html">
+                <img src="FoxyStudios/Screenshot_20260421_000325.jpg" alt="FoxyAcademy" class="logo-icon">
+                <span class="logo-text">FoxyAcademy</span>
+            </a>
+        </div>
+        <nav>
+            <a href="index.html">👤 Sobre Mim</a>
+            <div class="menu-toggle aberto" onclick="toggleSubmenu('submenu-aulas')">
+                <div class="toggle-left">📚 Aulas</div>
+                <span class="seta rodada">▾</span>
+            </div>
+            <div class="submenu aberto" id="submenu-aulas">
+                <a href="aulas-iniciantes.html">Iniciantes</a>
+                <a href="aulas-basico.html">Básico</a>
+                <a href="aulas-medio.html">Médio</a>
+                <a href="aulas-avancado.html" class="ativo">Avançado</a>
+            </div>
+            <a href="experimentos.html">🧪 Experiências</a>
+        </nav>
+    </div>
+
+    <div class="conteudo">
+        <div class="page-header">
+            <div class="nivel-badge">🔴 Nível 4 de 4 — Avançado</div>
+            <h1>CSS Avançado & JavaScript</h1>
+            <p class="subtitulo">Flexbox, Grid, responsividade, animações e os teus primeiros passos em JavaScript.</p>
+            <div class="linha-destaque"></div>
+        </div>
+
+        <div class="aula-card">
+            <h2>1. Flexbox — Layout em Uma Dimensão</h2>
+            <p>O <strong>Flexbox</strong> é um sistema de layout CSS que permite organizar elementos numa linha ou coluna de forma flexível e responsiva. Aplica-se ao <strong>elemento pai</strong>.</p>
+            <pre><code>.container {
+    display: flex;              /* Ativa o Flexbox */
+    flex-direction: row;        /* row (padrão) | column */
+    justify-content: center;    /* Eixo principal: flex-start | center | flex-end | space-between | space-around */
+    align-items: center;        /* Eixo cruzado: stretch | flex-start | center | flex-end */
+    gap: 16px;                  /* Espaço entre os filhos */
+    flex-wrap: wrap;            /* wrap = quebra linha se necessário */
+}
+
+.filho {
+    flex: 1;                    /* Cresce igualmente para preencher o espaço */
+}</code></pre>
+
+            <div class="demo-label">justify-content: flex-start (padrão)</div>
+            <div class="flex-demo">
+                <div class="flex-item">A</div>
+                <div class="flex-item">B</div>
+                <div class="flex-item">C</div>
+            </div>
+            <div class="demo-label">justify-content: center</div>
+            <div class="flex-demo center">
+                <div class="flex-item">A</div>
+                <div class="flex-item">B</div>
+                <div class="flex-item">C</div>
+            </div>
+            <div class="demo-label">justify-content: space-between</div>
+            <div class="flex-demo between">
+                <div class="flex-item">A</div>
+                <div class="flex-item">B</div>
+                <div class="flex-item">C</div>
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>2. CSS Grid — Layout em Duas Dimensões</h2>
+            <p>O <strong>Grid</strong> é ideal para layouts complexos com linhas e colunas ao mesmo tempo — ideal para a estrutura geral de uma página.</p>
+            <pre><code>.grelha {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);  /* 3 colunas iguais */
+    grid-template-columns: 1fr 2fr 1fr;     /* 3 colunas com proporções diferentes */
+    gap: 20px;                               /* Espaço entre células */
+}
+
+.elemento-largo {
+    grid-column: span 2;     /* Ocupa 2 colunas */
+}
+
+.elemento-completo {
+    grid-column: 1 / -1;     /* Ocupa a linha toda */
+}</code></pre>
+
+            <div class="demo-label">Grid 3 colunas com elementos de largura variável</div>
+            <div class="grid-demo">
+                <div class="grid-item">1</div>
+                <div class="grid-item wide">2 (span 2)</div>
+                <div class="grid-item full">3 (linha completa)</div>
+                <div class="grid-item">4</div>
+                <div class="grid-item">5</div>
+                <div class="grid-item">6</div>
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>3. Media Queries — Responsividade</h2>
+            <p>As <strong>Media Queries</strong> permitem aplicar CSS diferente consoante o tamanho do ecrã. É assim que uma página se adapta a telemóveis, tablets e computadores.</p>
+            <pre><code>.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+    .sidebar {
+        display: none;
+    }
+}</code></pre>
+            <div class="info-box dica">
+                💡 A abordagem <strong>Mobile First</strong> (desenhar primeiro para telemóvel, depois expandir para desktop) é a mais recomendada atualmente. Usa <code>min-width</code> em vez de <code>max-width</code>.
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>4. Variáveis CSS (Custom Properties)</h2>
+            <p>As variáveis CSS permitem guardar valores (cores, tamanhos, fontes) numa só sítio e reutilizá-los em todo o projeto. Mudar a cor principal passa a ser uma alteração num único lugar.</p>
+            <pre><code>:root {
+    --cor-primaria: #ff4d4d;
+    --cor-texto: #333;
+    --cor-fundo: #f0f2f5;
+    --raio-borda: 8px;
+    --sombra: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.botao {
+    background-color: var(--cor-primaria);
+    border-radius: var(--raio-borda);
+    box-shadow: var(--sombra);
+    color: white;
+}
+
+h1 { color: var(--cor-primaria); }
+body { color: var(--cor-texto); background: var(--cor-fundo); }</code></pre>
+        </div>
+
+        <div class="aula-card">
+            <h2>5. Transições e Animações CSS</h2>
+            <h3>Transições (transition)</h3>
+            <p>Definem a <strong>suavidade da mudança</strong> entre dois estados (ex: cor normal → cor ao passar o rato).</p>
+            <pre><code>.botao {
+    background-color: #ff4d4d;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.botao:hover {
+    background-color: #cc0000;
+    transform: translateY(-3px);
+}</code></pre>
+
+            <h3>Animações (animation + @keyframes)</h3>
+            <p>Permitem criar <strong>animações complexas</strong> com vários estados intermédios.</p>
+            <pre><code>@keyframes aparecer {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    animation: aparecer 0.5s ease forwards;
+}
+
+@keyframes rodar {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.loading {
+    animation: rodar 1s linear infinite;
+}</code></pre>
+        </div>
+
+        <div class="aula-card">
+            <h2>6. Introdução ao JavaScript</h2>
+            <p>O <strong>JavaScript</strong> é a linguagem de programação da web. Ao contrário do HTML e CSS, tem lógica real — variáveis, condições, loops e funções.</p>
+            <pre><code>&lt;script&gt;
+
+// VARIÁVEIS
+let nome = "Rodrigo";
+const idade = 15;
+
+// TIPOS DE DADOS
+let texto = "Olá!";
+let numero = 42;
+let booleano = true;
+let lista = [1, 2, 3];
+let objeto = { nome: "RC" };
+
+// CONDIÇÕES
+if (idade >= 18) {
+    console.log("É maior de idade");
+} else {
+    console.log("É menor de idade");
+}
+
+// LOOP
+for (let i = 0; i < 5; i++) {
+    console.log("Número: " + i);
+}
+
+// FUNÇÃO
+function saudar(nome) {
+    return "Olá, " + nome + "!";
+}
+console.log(saudar("Rodrigo"));
+
+&lt;/script&gt;</code></pre>
+        </div>
+
+        <div class="aula-card">
+            <h2>7. Manipulação do DOM</h2>
+            <p>O <strong>DOM</strong> (Document Object Model) é a representação em memória de toda a página HTML. Com JavaScript, podemos <strong>selecionar, modificar e criar elementos</strong> em tempo real.</p>
+            <pre><code>// SELECIONAR ELEMENTOS
+const titulo = document.getElementById("titulo");
+const cards = document.querySelectorAll(".card");
+const primeiro = document.querySelector(".card");
+
+// MODIFICAR CONTEÚDO
+titulo.textContent = "Novo Título!";
+titulo.innerHTML = "&lt;em&gt;Título em itálico&lt;/em&gt;";
+
+// MODIFICAR ESTILOS
+titulo.style.color = "red";
+titulo.style.fontSize = "2em";
+
+// ADICIONAR/REMOVER CLASSES
+titulo.classList.add("destaque");
+titulo.classList.remove("antigo");
+titulo.classList.toggle("visivel");
+
+// CRIAR E ADICIONAR ELEMENTOS
+const novoParagrafo = document.createElement("p");
+novoParagrafo.textContent = "Criado com JavaScript!";
+document.body.appendChild(novoParagrafo);</code></pre>
+        </div>
+
+        <div class="aula-card">
+            <h2>8. Eventos JavaScript</h2>
+            <p>Os <strong>eventos</strong> são ações do utilizador (clique, tecla, mover o rato...) às quais o JavaScript pode reagir.</p>
+            <pre><code>const botao = document.getElementById("meu-botao");
+
+botao.addEventListener("click", function() {
+    alert("Clicaste no botão!");
+});
+
+botao.addEventListener("click", () => {
+    document.getElementById("resultado").textContent = "Clicado!";
+});
+
+elemento.addEventListener("click", () => {});
+elemento.addEventListener("mouseover", () => {});
+elemento.addEventListener("mouseout", () => {});
+input.addEventListener("input", () => {});
+formulario.addEventListener("submit", (e) => {
+    e.preventDefault();
+});</code></pre>
+
+            <h3>Experimenta aqui!</h3>
+            <p>Este botão usa JavaScript para reagir ao teu clique:</p>
+            <button class="botao-demo" onclick="demonstrarEvento()">Clica em mim!</button>
+            <div id="resultado-demo">✅ Evento disparado! O JavaScript funcionou corretamente.</div>
+
+            <div class="info-box sucesso" style="margin-top: 20px;">
+                🎉 <strong>Parabéns!</strong> Completaste os 4 níveis do Dev Academy. Agora pratica no separador <a href="experimentos.html" style="color: #166534;">🧪 Experimentos</a>!
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleSubmenu(id) {
+            const submenu = document.getElementById(id);
+            const toggle = submenu.previousElementSibling;
+            const seta = toggle.querySelector('.seta');
+            submenu.classList.toggle('aberto');
+            toggle.classList.toggle('aberto');
+            seta.classList.toggle('rodada');
+        }
+
+        function demonstrarEvento() {
+            const resultado = document.getElementById('resultado-demo');
+            resultado.style.display = 'block';
+            setTimeout(() => { resultado.style.display = 'none'; }, 3000);
+        }
+    </script>
+</body>
+</html>

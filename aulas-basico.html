@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoxyAcademy - Básico</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f0f2f5; color: #333; }
+
+        .sidebar { height: 100vh; width: 240px; position: fixed; top: 0; left: 0; background: linear-gradient(180deg, #2c2c2c 0%, #1a1a1a 100%); box-shadow: 3px 0 15px rgba(0,0,0,0.4); z-index: 100; overflow-y: auto; display: flex; flex-direction: column; }
+        .sidebar-logo { display: flex; align-items: center; gap: 12px; padding: 22px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 8px; flex-shrink: 0; }
+        .sidebar-logo a { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon { width: 34px; height: 34px; border-radius: 8px; object-fit: contain; padding: 4px; flex-shrink: 0; }
+        .logo-text { color: #fff; font-weight: 600; font-size: 14px; }
+        .sidebar nav { flex: 1; padding-bottom: 20px; }
+        .sidebar a { padding: 12px 22px; text-decoration: none; font-size: 14px; color: #aaa; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .sidebar a:hover { background: rgba(255,255,255,0.05); color: #fff; padding-left: 30px; }
+        .sidebar a.ativo { border-left: 3px solid #ff4d4d; color: #ff4d4d; font-weight: 600; background: rgba(255,77,77,0.1); }
+        .menu-toggle { padding: 12px 22px; cursor: pointer; font-size: 14px; color: #aaa; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease; border-left: 3px solid transparent; user-select: none; }
+        .menu-toggle:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .menu-toggle.aberto { color: #ff4d4d; border-left: 3px solid #ff4d4d; background: rgba(255,77,77,0.08); }
+        .toggle-left { display: flex; align-items: center; gap: 10px; }
+        .seta { font-size: 11px; transition: transform 0.3s ease; }
+        .seta.rodada { transform: rotate(180deg); }
+        .submenu { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; background: rgba(0,0,0,0.15); }
+        .submenu.aberto { max-height: 200px; }
+        .submenu a { padding: 9px 22px 9px 48px; font-size: 13px; color: #888; gap: 0; }
+        .submenu a:hover { padding-left: 55px; color: #ddd; background: rgba(255,255,255,0.04); }
+        .submenu a.ativo { color: #ff4d4d; border-left: 3px solid #ff4d4d; background: rgba(255,77,77,0.1); font-weight: 600; }
+
+        .conteudo { margin-left: 240px; padding: 50px; max-width: 950px; }
+        .page-header { margin-bottom: 40px; }
+        .page-header h1 { font-size: 2em; color: #1a1a1a; margin: 0 0 8px; }
+        .page-header .subtitulo { color: #777; font-size: 1.05em; margin: 0 0 14px; }
+        .linha-destaque { width: 50px; height: 4px; background: #ff4d4d; border-radius: 2px; }
+        .nivel-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 16px; background: #e8fff0; color: #1e7e34; }
+        .aula-card { background: #fff; border-radius: 10px; padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-top: 4px solid #ff4d4d; transition: transform 0.25s, box-shadow 0.25s; }
+        .aula-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .aula-card h2 { color: #e84040; font-size: 1.2em; margin: 0 0 14px; }
+        .aula-card h3 { color: #444; font-size: 1em; margin: 20px 0 8px; }
+        .aula-card p { line-height: 1.75; color: #555; font-size: 0.97em; margin: 0 0 12px; }
+        ul, ol { padding-left: 22px; }
+        li { margin-bottom: 8px; color: #555; line-height: 1.7; }
+        strong { color: #333; }
+        hr { border: none; height: 1px; background: #eee; margin: 20px 0; }
+
+        pre { background: #1e1e1e; color: #00ff0d; padding: 18px 22px; border-radius: 8px; overflow-x: auto; line-height: 1.6; font-family: 'Consolas', monospace; font-size: 0.88em; margin: 12px 0; border-left: 4px solid #ff4d4d; }
+        code { background: #2d2d2d; color: #ff9f43; padding: 2px 7px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.88em; }
+        pre code { background: none; color: inherit; padding: 0; }
+
+        .info-box { padding: 14px 18px; border-radius: 0 8px 8px 0; border-left: 4px solid #ff4d4d; background: #fff5f5; margin: 14px 0; font-size: 0.95em; line-height: 1.65; color: #555; }
+        .info-box.dica { background: #f0f9ff; border-color: #3498db; }
+        .info-box.aviso { background: #fff9e6; border-color: #f39c12; }
+        .info-box.sucesso { background: #f0fff4; border-color: #27ae60; }
+
+        .demo-titulos { background: #f9f9f9; border-radius: 8px; padding: 20px; margin: 12px 0; }
+        .demo-titulos h1, .demo-titulos h2, .demo-titulos h3,
+        .demo-titulos h4, .demo-titulos h5, .demo-titulos h6 { margin: 4px 0; color: #333; }
+
+        .tabela-ref { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.9em; }
+        .tabela-ref th { background: #ff4d4d; color: white; padding: 10px 14px; text-align: left; }
+        .tabela-ref td { padding: 10px 14px; border-bottom: 1px solid #eee; color: #555; }
+        .tabela-ref tr:last-child td { border-bottom: none; }
+        .tabela-ref tr:hover td { background: #fff5f5; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <a href="entrada.html">
+                <img src="FoxyStudios/Screenshot_20260421_000325.jpg" alt="FoxyAcademy" class="logo-icon">
+                <span class="logo-text">FoxyAcademy</span>
+            </a>
+        </div>
+        <nav>
+            <a href="index.html">👤 Sobre Mim</a>
+            <div class="menu-toggle aberto" onclick="toggleSubmenu('submenu-aulas')">
+                <div class="toggle-left">📚 Aulas</div>
+                <span class="seta rodada">▾</span>
+            </div>
+            <div class="submenu aberto" id="submenu-aulas">
+                <a href="aulas-iniciantes.html">Iniciantes</a>
+                <a href="aulas-basico.html" class="ativo">Básico</a>
+                <a href="aulas-medio.html">Médio</a>
+                <a href="aulas-avancado.html">Avançado</a>
+            </div>
+            <a href="experimentos.html">🧪 Experiências</a>
+        </nav>
+    </div>
+
+    <div class="conteudo">
+        <div class="page-header">
+            <div class="nivel-badge">🟢 Nível 2 de 4 — Básico</div>
+            <h1>HTML Básico</h1>
+            <p class="subtitulo">As tags fundamentais que vais usar em absolutamente todas as páginas web.</p>
+            <div class="linha-destaque"></div>
+        </div>
+
+        <div class="aula-card">
+            <h2>0. A Estrutura Base do HTML5</h2>
+            <p>Todo o ficheiro HTML começa com esta estrutura obrigatória. Sem ela, o browser pode interpretar mal o conteúdo.</p>
+            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="pt"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;O título que aparece na aba do browser&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;!-- O teu conteúdo visível vai aqui dentro --&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            <h3>O que faz cada parte?</h3>
+            <ul>
+                <li><code>&lt;!DOCTYPE html&gt;</code> → Diz ao browser que estamos a usar <strong>HTML5</strong>.</li>
+                <li><code>&lt;html lang="pt"&gt;</code> → Raiz de tudo. O atributo <code>lang</code> indica o idioma.</li>
+                <li><code>&lt;head&gt;</code> → "Cérebro" invisível: título da aba, ligações a CSS, configurações.</li>
+                <li><code>&lt;meta charset="UTF-8"&gt;</code> → Garante que os caracteres especiais (ã, ç, é...) aparecem corretamente.</li>
+                <li><code>&lt;meta name="viewport"...&gt;</code> → Faz a página funcionar bem em telemóveis.</li>
+                <li><code>&lt;body&gt;</code> → Tudo o que o utilizador vê vai aqui.</li>
+            </ul>
+        </div>
+
+        <div class="aula-card">
+            <h2>1. Tags de Título (h1 a h6)</h2>
+            <p>Existem 6 níveis de títulos em HTML. O <code>&lt;h1&gt;</code> é o mais importante e o <code>&lt;h6&gt;</code> o menos. Devem ser usados de forma hierárquica — como um índice de livro.</p>
+            <pre><code>&lt;h1&gt;Título Principal (apenas um por página)&lt;/h1&gt;
+&lt;h2&gt;Título de Secção&lt;/h2&gt;
+&lt;h3&gt;Título de Sub-secção&lt;/h3&gt;
+&lt;h4&gt;Título de nível 4&lt;/h4&gt;
+&lt;h5&gt;Título de nível 5&lt;/h5&gt;
+&lt;h6&gt;Título de nível 6 (o mais pequeno)&lt;/h6&gt;</code></pre>
+            <div class="demo-titulos">
+                <h1 style="margin:4px 0;font-size:2em">h1 — Título Principal</h1>
+                <h2 style="margin:4px 0;font-size:1.5em;color:#333">h2 — Título de Secção</h2>
+                <h3 style="margin:4px 0;font-size:1.17em;color:#333">h3 — Sub-secção</h3>
+                <h4 style="margin:4px 0;font-size:1em;color:#333">h4 — Nível 4</h4>
+                <h5 style="margin:4px 0;font-size:0.85em;color:#333">h5 — Nível 5</h5>
+                <h6 style="margin:4px 0;font-size:0.75em;color:#333">h6 — Nível 6</h6>
+            </div>
+            <div class="info-box dica">
+                💡 Cada página deve ter <strong>apenas um <code>&lt;h1&gt;</code></strong>. É o título principal — como o título de um livro.
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>2. Parágrafos e Texto</h2>
+            <p>Para qualquer bloco de texto corrido, usa a tag <code>&lt;p&gt;</code> (de <em>Paragraph</em>). O browser adiciona automaticamente espaço antes e depois de cada parágrafo.</p>
+            <pre><code>&lt;p&gt;Este é o meu primeiro parágrafo. Pode ter o texto que quiseres.&lt;/p&gt;
+
+&lt;p&gt;Este é o segundo parágrafo. O browser separa-os automaticamente.&lt;/p&gt;</code></pre>
+            <div class="info-box aviso">
+                ⚠️ Não uses <code>&lt;br&gt;</code> em excesso para criar espaços entre parágrafos. Usa vários <code>&lt;p&gt;</code> — é a forma correta!
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>3. Ênfase: Negrito, Itálico e Sublinhado</h2>
+            <p>Existem tags para dar destaque a partes do texto. É importante conhecer a diferença entre as versões <strong>semânticas</strong> e as <strong>visuais</strong>:</p>
+            <table class="tabela-ref">
+                <tr><th>Tag</th><th>Resultado</th><th>Significado</th></tr>
+                <tr><td><code>&lt;strong&gt;</code></td><td><strong>Texto em negrito</strong></td><td>Conteúdo <em>importante</em> (semântico)</td></tr>
+                <tr><td><code>&lt;b&gt;</code></td><td><b>Texto em negrito</b></td><td>Apenas negrito visual (sem significado)</td></tr>
+                <tr><td><code>&lt;em&gt;</code></td><td><em>Texto em itálico</em></td><td>Ênfase (semântico)</td></tr>
+                <tr><td><code>&lt;i&gt;</code></td><td><i>Texto em itálico</i></td><td>Apenas itálico visual (sem significado)</td></tr>
+                <tr><td><code>&lt;u&gt;</code></td><td><u>Texto sublinhado</u></td><td>Anotação (usar com cautela)</td></tr>
+            </table>
+            <pre><code>&lt;p&gt;Esta palavra é &lt;strong&gt;muito importante&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;Podes combinar: &lt;strong&gt;&lt;em&gt;negrito e itálico&lt;/em&gt;&lt;/strong&gt;.&lt;/p&gt;</code></pre>
+            <div class="info-box dica">
+                💡 Prefere sempre <code>&lt;strong&gt;</code> a <code>&lt;b&gt;</code>, e <code>&lt;em&gt;</code> a <code>&lt;i&gt;</code>.
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>4. Listas</h2>
+            <p>Existem dois tipos de listas em HTML, e ambas usam a tag <code>&lt;li&gt;</code> (de <em>List Item</em>) para os itens:</p>
+            <h3>Lista Não-Ordenada (ul) — com pontos</h3>
+            <pre><code>&lt;ul&gt;
+  &lt;li&gt;HTML&lt;/li&gt;
+  &lt;li&gt;CSS&lt;/li&gt;
+  &lt;li&gt;JavaScript&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+            <h3>Lista Ordenada (ol) — numerada</h3>
+            <pre><code>&lt;ol&gt;
+  &lt;li&gt;Aprende HTML&lt;/li&gt;
+  &lt;li&gt;Aprende CSS&lt;/li&gt;
+  &lt;li&gt;Aprende JavaScript&lt;/li&gt;
+&lt;/ol&gt;</code></pre>
+            <h3>Lista Dentro de Lista (aninhada)</h3>
+            <pre><code>&lt;ul&gt;
+  &lt;li&gt;Linguagens da Web
+    &lt;ul&gt;
+      &lt;li&gt;HTML&lt;/li&gt;
+      &lt;li&gt;CSS&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;JavaScript&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+        </div>
+
+        <div class="aula-card">
+            <h2>5. Links</h2>
+            <p>Os links são o que torna a web uma "teia". Usamos a tag <code>&lt;a&gt;</code> (de <em>Anchor</em>) com o atributo <code>href</code>.</p>
+            <pre><code>&lt;a href="https://google.com"&gt;Ir para o Google&lt;/a&gt;
+&lt;a href="https://google.com" target="_blank"&gt;Abrir em nova aba&lt;/a&gt;
+&lt;a href="sobre.html"&gt;Sobre nós&lt;/a&gt;
+&lt;a href="mailto:email@exemplo.com"&gt;Envia-nos um e-mail&lt;/a&gt;
+&lt;a href="#contacto"&gt;Ir para Contactos&lt;/a&gt;</code></pre>
+            <div class="info-box dica">
+                💡 <code>target="_blank"</code> abre o link numa nova aba. Para segurança, junta sempre <code>rel="noopener noreferrer"</code> quando ligares a sites externos.
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>6. Imagens</h2>
+            <p>A tag <code>&lt;img&gt;</code> é auto-fechada — não precisa de <code>&lt;/img&gt;</code>. Os atributos <code>src</code> e <code>alt</code> são obrigatórios.</p>
+            <pre><code>&lt;img src="imagens/foto.jpg" alt="Descrição da foto" width="300"&gt;
+&lt;img src="https://exemplo.com/imagem.png" alt="Descrição" width="400"&gt;</code></pre>
+            <ul>
+                <li><code>src</code> → Caminho para a imagem (local ou URL).</li>
+                <li><code>alt</code> → Texto que aparece se a imagem não carregar. <strong>Fundamental para acessibilidade.</strong></li>
+                <li><code>width</code> / <code>height</code> → Dimensões da imagem em píxeis.</li>
+            </ul>
+            <div class="info-box aviso">
+                ⚠️ Nunca deixes o <code>alt</code> vazio se a imagem tiver conteúdo.
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>7. Quebras de Linha e Divisores</h2>
+            <p>Duas tags simples mas úteis para separar conteúdo:</p>
+            <pre><code>&lt;p&gt;Linha um.&lt;br&gt;Linha dois — sem espaço entre elas.&lt;/p&gt;
+&lt;hr&gt;</code></pre>
+            <div class="info-box dica">
+                💡 Usa <code>&lt;hr&gt;</code> para separar secções de conteúdo temáticas.
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>8. Comentários</h2>
+            <p>Os comentários são notas que escreves no código para ti mesmo (ou para outros programadores). O browser <strong>ignora completamente</strong> os comentários.</p>
+            <pre><code>&lt;!-- Isto é um comentário e não aparece na página --&gt;
+
+&lt;!-- 
+    Comentários podem ter
+    múltiplas linhas
+--&gt;
+
+&lt;p&gt;Isto aparece na página.&lt;/p&gt;
+&lt;!-- &lt;p&gt;Este parágrafo está "desativado" pelo comentário.&lt;/p&gt; --&gt;</code></pre>
+            <div class="info-box sucesso">
+                ✅ Parabéns! Já conheces o Básico do HTML. Continua para o próximo nível: <strong><a href="aulas-medio.html" style="color: #166534;">Médio →</a></strong>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleSubmenu(id) {
+            const submenu = document.getElementById(id);
+            const toggle = submenu.previousElementSibling;
+            const seta = toggle.querySelector('.seta');
+            submenu.classList.toggle('aberto');
+            toggle.classList.toggle('aberto');
+            seta.classList.toggle('rodada');
+        }
+    </script>
+</body>
+</html>

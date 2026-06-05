@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoxyAcademy - Médio</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f0f2f5; color: #333; }
+
+        .sidebar { height: 100vh; width: 240px; position: fixed; top: 0; left: 0; background: linear-gradient(180deg, #2c2c2c 0%, #1a1a1a 100%); box-shadow: 3px 0 15px rgba(0,0,0,0.4); z-index: 100; overflow-y: auto; display: flex; flex-direction: column; }
+        .sidebar-logo { display: flex; align-items: center; gap: 12px; padding: 22px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 8px; flex-shrink: 0; }
+        .sidebar-logo a { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon { width: 34px; height: 34px; border-radius: 8px; object-fit: contain; padding: 4px; flex-shrink: 0; }
+        .logo-text { color: #fff; font-weight: 600; font-size: 14px; }
+        .sidebar nav { flex: 1; padding-bottom: 20px; }
+        .sidebar a { padding: 12px 22px; text-decoration: none; font-size: 14px; color: #aaa; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .sidebar a:hover { background: rgba(255,255,255,0.05); color: #fff; padding-left: 30px; }
+        .sidebar a.ativo { border-left: 3px solid #ff4d4d; color: #ff4d4d; font-weight: 600; background: rgba(255,77,77,0.1); }
+        .menu-toggle { padding: 12px 22px; cursor: pointer; font-size: 14px; color: #aaa; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease; border-left: 3px solid transparent; user-select: none; }
+        .menu-toggle:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .menu-toggle.aberto { color: #ff4d4d; border-left: 3px solid #ff4d4d; background: rgba(255,77,77,0.08); }
+        .toggle-left { display: flex; align-items: center; gap: 10px; }
+        .seta { font-size: 11px; transition: transform 0.3s ease; }
+        .seta.rodada { transform: rotate(180deg); }
+        .submenu { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; background: rgba(0,0,0,0.15); }
+        .submenu.aberto { max-height: 200px; }
+        .submenu a { padding: 9px 22px 9px 48px; font-size: 13px; color: #888; gap: 0; }
+        .submenu a:hover { padding-left: 55px; color: #ddd; background: rgba(255,255,255,0.04); }
+        .submenu a.ativo { color: #ff4d4d; border-left: 3px solid #ff4d4d; background: rgba(255,77,77,0.1); font-weight: 600; }
+
+        .conteudo { margin-left: 240px; padding: 50px; max-width: 950px; }
+        .page-header { margin-bottom: 40px; }
+        .page-header h1 { font-size: 2em; color: #1a1a1a; margin: 0 0 8px; }
+        .page-header .subtitulo { color: #777; font-size: 1.05em; margin: 0 0 14px; }
+        .linha-destaque { width: 50px; height: 4px; background: #ff4d4d; border-radius: 2px; }
+        .nivel-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 16px; background: #fff3e0; color: #e65100; }
+        .aula-card { background: #fff; border-radius: 10px; padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-top: 4px solid #ff4d4d; transition: transform 0.25s, box-shadow 0.25s; }
+        .aula-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .aula-card h2 { color: #e84040; font-size: 1.2em; margin: 0 0 14px; }
+        .aula-card h3 { color: #444; font-size: 1em; margin: 20px 0 8px; }
+        .aula-card p { line-height: 1.75; color: #555; font-size: 0.97em; margin: 0 0 12px; }
+        ul, ol { padding-left: 22px; }
+        li { margin-bottom: 8px; color: #555; line-height: 1.7; }
+        strong { color: #333; }
+        hr { border: none; height: 1px; background: #eee; margin: 20px 0; }
+
+        pre { background: #1e1e1e; color: #00ff0d; padding: 18px 22px; border-radius: 8px; overflow-x: auto; line-height: 1.6; font-family: 'Consolas', monospace; font-size: 0.88em; margin: 12px 0; border-left: 4px solid #ff4d4d; }
+        code { background: #2d2d2d; color: #ff9f43; padding: 2px 7px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.88em; }
+        pre code { background: none; color: inherit; padding: 0; }
+
+        .info-box { padding: 14px 18px; border-radius: 0 8px 8px 0; border-left: 4px solid #ff4d4d; background: #fff5f5; margin: 14px 0; font-size: 0.95em; line-height: 1.65; color: #555; }
+        .info-box.dica { background: #f0f9ff; border-color: #3498db; }
+        .info-box.aviso { background: #fff9e6; border-color: #f39c12; }
+        .info-box.sucesso { background: #f0fff4; border-color: #27ae60; }
+
+        .grid-semantica { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+        .tag-card { background: #f9f9f9; border-radius: 8px; padding: 14px; border-left: 3px solid #ff4d4d; }
+        .tag-card code { background: #2d2d2d; color: #ff9f43; font-size: 0.85em; }
+        .tag-card p { font-size: 0.88em; color: #666; margin: 6px 0 0; line-height: 1.5; }
+
+        .box-model { background: #e8f4f8; border: 3px dashed #3498db; padding: 20px; text-align: center; border-radius: 4px; margin: 14px 0; font-size: 0.88em; color: #555; }
+        .box-model .border-box { background: #d5e8d4; border: 3px solid #82b366; padding: 16px; border-radius: 4px; }
+        .box-model .padding-box { background: #fff2cc; border: 1px dashed #d6b656; padding: 12px; border-radius: 4px; }
+        .box-model .content-box { background: #dae8fc; border: 1px solid #6c8ebf; padding: 10px; border-radius: 4px; color: #333; font-weight: 600; }
+        .box-label { font-size: 11px; font-weight: 700; color: #666; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .css-formas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+        .css-forma { background: #f9f9f9; border-radius: 8px; padding: 16px; text-align: center; }
+        .css-forma h4 { margin: 0 0 8px; font-size: 0.9em; color: #e84040; }
+        .css-forma p { font-size: 0.82em; color: #666; margin: 0; line-height: 1.5; }
+        .css-forma .pros { color: #27ae60; font-size: 0.8em; font-weight: 600; }
+        .css-forma .cons { color: #e74c3c; font-size: 0.8em; font-weight: 600; }
+
+        .tabela-ref { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.9em; }
+        .tabela-ref th { background: #ff4d4d; color: white; padding: 10px 14px; text-align: left; }
+        .tabela-ref td { padding: 10px 14px; border-bottom: 1px solid #eee; color: #555; }
+        .tabela-ref tr:last-child td { border-bottom: none; }
+        .tabela-ref tr:hover td { background: #fff5f5; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <a href="entrada.html">
+                <img src="FoxyStudios/Screenshot_20260421_000325.jpg" alt="FoxyAcademy" class="logo-icon">
+                <span class="logo-text">FoxyAcademy</span>
+            </a>
+        </div>
+        <nav>
+            <a href="index.html">👤 Sobre Mim</a>
+            <div class="menu-toggle aberto" onclick="toggleSubmenu('submenu-aulas')">
+                <div class="toggle-left">📚 Aulas</div>
+                <span class="seta rodada">▾</span>
+            </div>
+            <div class="submenu aberto" id="submenu-aulas">
+                <a href="aulas-iniciantes.html">Iniciantes</a>
+                <a href="aulas-basico.html">Básico</a>
+                <a href="aulas-medio.html" class="ativo">Médio</a>
+                <a href="aulas-avancado.html">Avançado</a>
+            </div>
+            <a href="experimentos.html">🧪 Experiências</a>
+        </nav>
+    </div>
+
+    <div class="conteudo">
+        <div class="page-header">
+            <div class="nivel-badge">🟠 Nível 3 de 4 — Médio</div>
+            <h1>HTML Médio & Introdução ao CSS</h1>
+            <p class="subtitulo">Semântica, tabelas, formulários e os teus primeiros passos no CSS.</p>
+            <div class="linha-destaque"></div>
+        </div>
+
+        <div class="aula-card">
+            <h2>1. HTML Semântico — Tags com Significado</h2>
+            <p>O HTML5 trouxe tags <strong>semânticas</strong> — tags cujo nome descreve o seu propósito. Ajudam o browser, os motores de busca e os leitores de ecrã a entender a estrutura da página.</p>
+            <pre><code>&lt;header&gt;
+  &lt;nav&gt;
+    &lt;a href="index.html"&gt;Início&lt;/a&gt;
+    &lt;a href="sobre.html"&gt;Sobre&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;
+
+&lt;main&gt;
+  &lt;section&gt;
+    &lt;h2&gt;Secção principal&lt;/h2&gt;
+    &lt;article&gt;
+      &lt;h3&gt;Artigo individual&lt;/h3&gt;
+      &lt;p&gt;Conteúdo do artigo...&lt;/p&gt;
+    &lt;/article&gt;
+  &lt;/section&gt;
+
+  &lt;aside&gt;
+    &lt;p&gt;Conteúdo lateral (publicidade, links relacionados)&lt;/p&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;footer&gt;
+  &lt;p&gt;© 2025 Rodrigo. Todos os direitos reservados.&lt;/p&gt;
+&lt;/footer&gt;</code></pre>
+
+            <div class="grid-semantica">
+                <div class="tag-card"><code>&lt;header&gt;</code><p>Cabeçalho da página ou de uma secção. Geralmente contém o logótipo e navegação.</p></div>
+                <div class="tag-card"><code>&lt;nav&gt;</code><p>Bloco de navegação. Links principais do site.</p></div>
+                <div class="tag-card"><code>&lt;main&gt;</code><p>Conteúdo principal da página. Deve ser único por página.</p></div>
+                <div class="tag-card"><code>&lt;section&gt;</code><p>Secção temática de conteúdo. Agrupa conteúdo relacionado.</p></div>
+                <div class="tag-card"><code>&lt;article&gt;</code><p>Conteúdo independente (post de blog, notícia, comentário).</p></div>
+                <div class="tag-card"><code>&lt;aside&gt;</code><p>Conteúdo lateral, complementar ao principal.</p></div>
+                <div class="tag-card"><code>&lt;footer&gt;</code><p>Rodapé da página. Contactos, links legais, copyright.</p></div>
+                <div class="tag-card"><code>&lt;div&gt;</code><p>Divisão genérica sem significado semântico. Usar quando nenhuma outra tag serve.</p></div>
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>2. Tabelas</h2>
+            <p>As tabelas servem para organizar <strong>dados em grelha</strong> (linhas e colunas). <strong>Não devem ser usadas para layout de página!</strong></p>
+            <pre><code>&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Nome&lt;/th&gt;
+      &lt;th&gt;Idade&lt;/th&gt;
+      &lt;th&gt;País&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Rodrigo&lt;/td&gt;
+      &lt;td&gt;15&lt;/td&gt;
+      &lt;td&gt;Portugal&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+            <ul>
+                <li><code>&lt;table&gt;</code> → Contentor da tabela toda.</li>
+                <li><code>&lt;thead&gt;</code> → Cabeçalho da tabela (linha com os títulos das colunas).</li>
+                <li><code>&lt;tbody&gt;</code> → Corpo da tabela (os dados).</li>
+                <li><code>&lt;tr&gt;</code> → <em>Table Row</em> — uma linha da tabela.</li>
+                <li><code>&lt;th&gt;</code> → <em>Table Header</em> — célula de cabeçalho (negrito e centrado por defeito).</li>
+                <li><code>&lt;td&gt;</code> → <em>Table Data</em> — célula de dados normal.</li>
+            </ul>
+        </div>
+
+        <div class="aula-card">
+            <h2>3. Formulários</h2>
+            <p>Os formulários permitem ao utilizador <strong>introduzir dados</strong> — como campos de login, pesquisa, ou registo.</p>
+            <pre><code>&lt;form action="processar.php" method="POST"&gt;
+  &lt;label for="nome"&gt;Nome:&lt;/label&gt;
+  &lt;input type="text" id="nome" name="nome" placeholder="O teu nome"&gt;
+
+  &lt;label for="email"&gt;E-mail:&lt;/label&gt;
+  &lt;input type="email" id="email" name="email"&gt;
+
+  &lt;label for="pass"&gt;Palavra-passe:&lt;/label&gt;
+  &lt;input type="password" id="pass" name="pass"&gt;
+
+  &lt;label for="msg"&gt;Mensagem:&lt;/label&gt;
+  &lt;textarea id="msg" name="msg" rows="5"&gt;&lt;/textarea&gt;
+
+  &lt;label for="nivel"&gt;Nível:&lt;/label&gt;
+  &lt;select id="nivel" name="nivel"&gt;
+    &lt;option value="iniciante"&gt;Iniciante&lt;/option&gt;
+    &lt;option value="medio"&gt;Médio&lt;/option&gt;
+    &lt;option value="avancado"&gt;Avançado&lt;/option&gt;
+  &lt;/select&gt;
+
+  &lt;button type="submit"&gt;Enviar&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+            <h3>Tipos de Input mais comuns</h3>
+            <table class="tabela-ref">
+                <tr><th>type=""</th><th>Para quê serve</th></tr>
+                <tr><td><code>text</code></td><td>Campo de texto simples</td></tr>
+                <tr><td><code>email</code></td><td>E-mail (valida formato automaticamente)</td></tr>
+                <tr><td><code>password</code></td><td>Palavra-passe (texto oculto)</td></tr>
+                <tr><td><code>number</code></td><td>Número</td></tr>
+                <tr><td><code>date</code></td><td>Data (abre um seletor de datas)</td></tr>
+                <tr><td><code>checkbox</code></td><td>Caixa de seleção (marcar/desmarcar)</td></tr>
+                <tr><td><code>radio</code></td><td>Opção única dentro de um grupo</td></tr>
+                <tr><td><code>file</code></td><td>Permite enviar um ficheiro</td></tr>
+                <tr><td><code>submit</code></td><td>Botão de envio do formulário</td></tr>
+            </table>
+        </div>
+
+        <div class="aula-card">
+            <h2>4. O que é CSS?</h2>
+            <p>A sigla <strong>CSS</strong> significa <em>Cascading Style Sheets</em> — Folhas de Estilo em Cascata. É a linguagem responsável pela <strong>aparência visual</strong> das páginas web.</p>
+            <div class="css-formas">
+                <div class="css-forma">
+                    <h4>Inline</h4>
+                    <p>Dentro da própria tag HTML, com o atributo <code>style</code>.</p>
+                    <p class="cons">✗ Difícil de manter</p>
+                </div>
+                <div class="css-forma">
+                    <h4>Interno</h4>
+                    <p>Dentro de uma tag <code>&lt;style&gt;</code> no <code>&lt;head&gt;</code>.</p>
+                    <p class="cons">✗ Só funciona nessa página</p>
+                </div>
+                <div class="css-forma">
+                    <h4>Externo ✓</h4>
+                    <p>Num ficheiro <code>.css</code> separado, ligado com <code>&lt;link&gt;</code>.</p>
+                    <p class="pros">✓ Recomendado</p>
+                </div>
+            </div>
+            <pre><code>&lt;!-- CSS INLINE (não recomendado) --&gt;
+&lt;p style="color: red; font-size: 18px;"&gt;Texto vermelho&lt;/p&gt;
+
+&lt;!-- CSS INTERNO --&gt;
+&lt;head&gt;
+  &lt;style&gt;
+    p { color: red; font-size: 18px; }
+  &lt;/style&gt;
+&lt;/head&gt;
+
+&lt;!-- CSS EXTERNO (recomendado) --&gt;
+&lt;head&gt;
+  &lt;link rel="stylesheet" href="estilos.css"&gt;
+&lt;/head&gt;</code></pre>
+        </div>
+
+        <div class="aula-card">
+            <h2>5. Seletores CSS — Como Escolher o que Estilizar</h2>
+            <p>Os seletores dizem ao CSS <strong>a que elementos aplicar os estilos</strong>. A sintaxe é sempre: <code>seletor { propriedade: valor; }</code></p>
+            <pre><code>/* Seletor de ELEMENTO */
+p { color: #555; line-height: 1.7; }
+h1 { font-size: 2em; color: #1a1a1a; }
+
+/* Seletor de CLASSE */
+.destaque { background-color: yellow; font-weight: bold; }
+.card { border-radius: 8px; padding: 20px; }
+
+/* Seletor de ID */
+#titulo-principal { color: red; font-size: 3em; }
+
+/* Combinação de seletores */
+.card h2 { color: red; }
+p, h1, h2 { margin-bottom: 10px; }</code></pre>
+            <div class="info-box dica">
+                💡 <strong>Classes vs IDs:</strong> Uma <code>class</code> pode ser usada em <em>vários</em> elementos. Um <code>id</code> deve ser único por página. Prefere sempre classes!
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>6. O Box Model — O Modelo da Caixa</h2>
+            <p>Em CSS, <strong>todos os elementos são retângulos (caixas)</strong>. O Box Model descreve as 4 camadas que compõem cada elemento:</p>
+            <div class="box-model">
+                <div class="box-label">Margin (margem exterior — espaço fora do elemento)</div>
+                <div class="border-box">
+                    <div class="box-label">Border (borda/moldura do elemento)</div>
+                    <div class="padding-box">
+                        <div class="box-label">Padding (espaço interior — entre borda e conteúdo)</div>
+                        <div class="content-box">Content (o conteúdo em si — texto, imagem, etc.)</div>
+                    </div>
+                </div>
+            </div>
+            <pre><code>.minha-caixa {
+    width: 300px;
+    height: 150px;
+    padding: 20px;
+    padding: 10px 20px;     /* vertical | horizontal */
+    border: 2px solid #333;
+    border-radius: 8px;
+    margin: 30px auto;      /* vertical: 30px | horizontal: centrado */
+}</code></pre>
+        </div>
+
+        <div class="aula-card">
+            <h2>7. Cores e Tipografia no CSS</h2>
+            <h3>Formas de definir cores</h3>
+            <pre><code>color: red;
+color: #ff4d4d;
+color: rgb(255, 77, 77);
+background-color: rgba(255, 77, 77, 0.5);</code></pre>
+
+            <h3>Propriedades de tipografia</h3>
+            <pre><code>p {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    font-style: italic;
+    line-height: 1.6;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    letter-spacing: 1px;
+}</code></pre>
+            <div class="info-box sucesso">
+                ✅ Pronto para o nível final? Segue para: <strong><a href="aulas-avancado.html" style="color: #166534;">Avançado →</a></strong>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleSubmenu(id) {
+            const submenu = document.getElementById(id);
+            const toggle = submenu.previousElementSibling;
+            const seta = toggle.querySelector('.seta');
+            submenu.classList.toggle('aberto');
+            toggle.classList.toggle('aberto');
+            seta.classList.toggle('rodada');
+        }
+    </script>
+</body>
+</html>

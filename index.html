@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoxyAcademy - Sobre Mim</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f0f2f5; color: #333; }
+
+        .sidebar { height: 100vh; width: 240px; position: fixed; top: 0; left: 0; background: linear-gradient(180deg, #2c2c2c 0%, #1a1a1a 100%); box-shadow: 3px 0 15px rgba(0,0,0,0.4); z-index: 100; overflow-y: auto; display: flex; flex-direction: column; }
+        .sidebar-logo { display: flex; align-items: center; gap: 12px; padding: 22px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 8px; flex-shrink: 0; }
+        .sidebar-logo a { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon { width: 34px; height: 34px; border-radius: 8px; object-fit: contain; padding: 4px; flex-shrink: 0; }
+        .logo-text { color: #fff; font-weight: 600; font-size: 14px; }
+        .sidebar nav { flex: 1; padding-bottom: 20px; }
+        .sidebar a { padding: 12px 22px; text-decoration: none; font-size: 14px; color: #aaa; display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; border-left: 3px solid transparent; }
+        .sidebar a:hover { background: rgba(255,255,255,0.05); color: #fff; padding-left: 30px; }
+        .sidebar a.ativo { border-left: 3px solid #ff4d4d; color: #ff4d4d; font-weight: 600; background: rgba(255,77,77,0.1); }
+        .menu-toggle { padding: 12px 22px; cursor: pointer; font-size: 14px; color: #aaa; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease; border-left: 3px solid transparent; user-select: none; }
+        .menu-toggle:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .menu-toggle.aberto { color: #ff4d4d; border-left: 3px solid #ff4d4d; background: rgba(255,77,77,0.08); }
+        .toggle-left { display: flex; align-items: center; gap: 10px; }
+        .seta { font-size: 11px; transition: transform 0.3s ease; }
+        .seta.rodada { transform: rotate(180deg); }
+        .submenu { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; background: rgba(0,0,0,0.15); }
+        .submenu.aberto { max-height: 200px; }
+        .submenu a { padding: 9px 22px 9px 48px; font-size: 13px; color: #888; gap: 0; }
+        .submenu a:hover { padding-left: 55px; color: #ddd; background: rgba(255,255,255,0.04); }
+        .submenu a.ativo { color: #ff4d4d; border-left: 3px solid #ff4d4d; background: rgba(255,77,77,0.1); font-weight: 600; }
+
+        .conteudo { margin-left: 240px; padding: 50px; max-width: 950px; }
+        .page-header { margin-bottom: 40px; }
+        .page-header h1 { font-size: 2em; color: #1a1a1a; margin: 0 0 8px; }
+        .page-header .subtitulo { color: #777; font-size: 1.05em; margin: 0 0 14px; }
+        .linha-destaque { width: 50px; height: 4px; background: #ff4d4d; border-radius: 2px; }
+        .aula-card { background: #fff; border-radius: 10px; padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-top: 4px solid #ff4d4d; transition: transform 0.25s, box-shadow 0.25s; }
+        .aula-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .aula-card h2 { color: #e84040; font-size: 1.2em; margin: 0 0 14px; }
+        .aula-card p { line-height: 1.75; color: #555; font-size: 0.97em; margin: 0 0 12px; }
+        ul, ol { padding-left: 22px; }
+        li { margin-bottom: 8px; color: #555; line-height: 1.7; }
+
+        .perfil-container { display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap; }
+        .foto-perfil { width: 150px; height: 150px; border-radius: 12px; border: 3px solid #ddd; box-shadow: 5px 5px 0px #ff4d4d; object-fit: cover; flex-shrink: 0; }
+        .perfil-texto h2 { color: #e84040; font-size: 1.3em; margin: 0 0 10px; }
+        .perfil-texto p { line-height: 1.75; color: #555; font-size: 0.97em; margin: 0 0 10px; }
+
+        .info-lista { list-style: none; padding: 0; }
+        .info-lista li { padding: 11px 0; border-bottom: 1px solid #f0f0f0; display: flex; gap: 15px; margin: 0; }
+        .info-lista li:last-child { border-bottom: none; }
+        .info-lista .label { color: #ff4d4d; font-weight: 600; min-width: 140px; font-size: 0.95em; }
+        .info-lista .valor { color: #444; font-size: 0.95em; }
+
+        .jornada-box { background: #1e1e1e; color: #00ff0d; padding: 22px 26px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.9em; line-height: 1.8; border-left: 4px solid #ff4d4d; margin-top: 15px; }
+        .jornada-box .cursor { animation: piscar 1s infinite; }
+        @keyframes piscar { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .email-link { color: #ff4d4d; text-decoration: none; font-weight: 500; }
+        .email-link:hover { text-decoration: underline; }
+
+        .tag-competencia { display: inline-block; background: #f0f2f5; color: #555; border: 1px solid #ddd; border-radius: 20px; padding: 4px 14px; font-size: 12.5px; margin: 4px 4px 4px 0; }
+        .tag-competencia.a-aprender { background: #fff5f5; border-color: #ffb3b3; color: #cc0000; }
+        .tag-competencia.aprendido { background: #f0fff4; border-color: #86efac; color: #166534; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <a href="entrada.html">
+                <img src="FoxyStudios/Screenshot_20260421_000325.jpg" alt="FoxyAcademy" class="logo-icon">
+                <span class="logo-text">FoxyAcademy</span>
+            </a>
+        </div>
+        <nav>
+            <a href="index.html" class="ativo">👤 Sobre Mim</a>
+            <div class="menu-toggle" onclick="toggleSubmenu('submenu-aulas')">
+                <div class="toggle-left">📚 Aulas</div>
+                <span class="seta">▾</span>
+            </div>
+            <div class="submenu" id="submenu-aulas">
+                <a href="aulas-iniciantes.html">Iniciantes</a>
+                <a href="aulas-basico.html">Básico</a>
+                <a href="aulas-medio.html">Médio</a>
+                <a href="aulas-avancado.html">Avançado</a>
+            </div>
+            <a href="experimentos.html">🧪 Experiências</a>
+        </nav>
+    </div>
+
+    <div class="conteudo">
+        <div class="page-header">
+            <h1>Sobre Mim</h1>
+            <p class="subtitulo">Conheça o criador deste projeto de aprendizagem.</p>
+            <div class="linha-destaque"></div>
+        </div>
+
+        <div class="aula-card">
+            <div class="perfil-container">
+                <img src="imagens/tua-foto.jpg" alt="Foto de Rodrigo" class="foto-perfil">
+                <div class="perfil-texto">
+                    <h2>Rodrigo Carvalho Ferreira</h2>
+                    <p>Olá! O meu nome é <strong>Rodrigo</strong>, tenho 15 anos e adoro programação. Não irei parar de aprender até concluir os meus objetivos no mundo digital!</p>
+                    <p>Este projeto é o meu caderno digital de aprendizagem — aqui documento tudo o que aprendo sobre HTML, CSS e muito mais.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="aula-card">
+            <h2>Informações Pessoais</h2>
+            <ul class="info-lista">
+                <li><span class="label">Nome Completo</span><span class="valor">Rodrigo Carvalho Ferreira</span></li>
+                <li><span class="label">Idade</span><span class="valor">15 anos</span></li>
+                <li><span class="label">Nascimento</span><span class="valor">31 de Outubro de 2010</span></li>
+                <li><span class="label">Localidade</span><span class="valor">Portugal 🇵🇹</span></li>
+                <li><span class="label">Curso</span><span class="valor">Multimédia</span></li>
+                <li><span class="label">E-mail</span><span class="valor"><a href="mailto:rodrigocarvalhoferreira2010@gmail.com" class="email-link">rodrigocarvalhoferreira2010@gmail.com</a></span></li>
+            </ul>
+        </div>
+
+        <div class="aula-card">
+            <h2>O Que Estou a Aprender</h2>
+            <p>Tecnologias em curso e objetivos futuros:</p>
+            <span class="tag-competencia aprendido">✔ HTML5</span>
+            <span class="tag-competencia aprendido">✔ CSS3</span>
+            <span class="tag-competencia aprendido">✔ Python</span>
+            <span class="tag-competencia a-aprender">⟳ JavaScript</span>
+            <span class="tag-competencia a-aprender">⟳ C++</span>
+            <span class="tag-competencia a-aprender">⟳ Godot</span>
+            <span class="tag-competencia a-aprender">⟳ Blender</span>
+        </div>
+
+        <div class="aula-card">
+            <h2>A Minha Jornada</h2>
+            <p>Atualmente estou a aprender as bases do desenvolvimento web e da lógica de programação. O meu objetivo é dominar todo o tipo de programação, seja para web, jogos ou sistemas.</p>
+            <div class="jornada-box">
+> Utilizador: rodrigo_dev<br>
+> Estado: A aprender HTML &amp; CSS<br>
+> Próximo objetivo: JavaScript<br>
+> Objetivo final: Full Stack Developer<br>
+> Motivação: [████████████] 100%<br>
+> Vontade de desistir: [░░░░░░░░░░░░] 0%<br>
+> _ <span class="cursor">█</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSubmenu(id) {
+            const submenu = document.getElementById(id);
+            const toggle = submenu.previousElementSibling;
+            const seta = toggle.querySelector('.seta');
+            submenu.classList.toggle('aberto');
+            toggle.classList.toggle('aberto');
+            seta.classList.toggle('rodada');
+        }
+    </script>
+</body>
+</html>
